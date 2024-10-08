@@ -354,7 +354,7 @@ def is_scrolling(driver, previous_scroll_position):
 
 def scrape_menu(url, menu_id):
     global restaurant_detail, all_items_details, clicked_items
-    driver = Driver(uc=True, undetectable=True)
+    driver = Driver(uc=True, undetectable=True, headless=True)
     driver.set_window_size(1024, 1024)  # Example for an iPad in portrait mode
 
     driver.get(url)
