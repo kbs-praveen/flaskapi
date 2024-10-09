@@ -8,12 +8,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime
 from re import search
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,Blueprint
 
 # Set up logging to console
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
+
+doorbash_bp = Blueprint('doordash', __name__)
 
 restaurant_detail = {}
 all_items_details = []
@@ -410,13 +412,12 @@ def scrape_menu(url, menu_id):
     return restaurant_detail
 
 # Flask API route
-@app.route('/scrape-menu', methods=['POST'])
+@doorbash_bp.route('/doordash_getmenu', methods=['POST'])
 def scrape_menu_api():
     try:
-        # Get URL and menu_id from the request
-        data = request.json
-        url = data.get('url')
-        menu_id = data.get('menu_id')
+        # Get URL and menu_id from the request arguments
+        url = request.args.get('url')
+        menu_id = request.args.get('menu_id')
 
         if not url or not menu_id:
             return jsonify({"error": "Please provide both 'url' and 'menu_id'"}), 400
@@ -433,6 +434,9 @@ def scrape_menu_api():
         logging.error(f"Error during scraping: {e}")
         return jsonify({"error": str(e)}), 500
 
+
+# Register the Blueprint
+app.register_blueprint(doorbash_bp)
 
 
 if __name__ == '__main__':
