@@ -232,8 +232,9 @@ class UberEatsSpider:
             for element in detail_elements:
                 logging.info("Processing a 'pick many' element.")
                 category_names = \
-                element.find_elements(By.CSS_SELECTOR, 'div[data-testid="customization-pick-many"] > div > div > div')[
-                    0]
+                    element.find_elements(By.CSS_SELECTOR,
+                                          'div[data-testid="customization-pick-many"] > div > div > div')[
+                        0]
                 category_name = category_names.find_elements(By.CSS_SELECTOR, 'div')[0].text
                 text = element.find_element(By.CSS_SELECTOR,
                                             'div[data-testid="customization-pick-many"] > div > div > div').text
@@ -269,11 +270,11 @@ class UberEatsSpider:
                          'leftHalfPrice': price, 'rightHalfPrice': price})
 
                 details.append({
-                    'item_name': item_name,
-                    'category_name': category_name.strip() if category_name else '',
+                    'type': "general",
+                    'name': category_name.strip() if category_name else '',
                     'requiresSelectionMin': 0,
                     'requiresSelectionMax': requires_selection_max,
-                    'options': option_details
+                    'ingredients': option_details
                 })
 
         except Exception as e:
@@ -288,7 +289,8 @@ class UberEatsSpider:
                 logging.info("Processing a 'pick one' element.")
 
                 category_names = \
-                element.find_elements(By.CSS_SELECTOR, 'div[data-testid="customization-pick-one"] > div > div > div')[0]
+                    element.find_elements(By.CSS_SELECTOR,
+                                          'div[data-testid="customization-pick-one"] > div > div > div')[0]
                 category_name = category_names.find_elements(By.CSS_SELECTOR, 'div')[0].text
                 text = element.find_element(By.CSS_SELECTOR,
                                             'div[data-testid="customization-pick-one"] > div > div > div').text
@@ -324,11 +326,11 @@ class UberEatsSpider:
                          'leftHalfPrice': price, 'rightHalfPrice': price})
 
                 details.append({
-                    'item_name': item_name,
-                    'category_name': category_name.strip() if category_name else '',
+                    'type': "general",
+                    'name': category_name.strip() if category_name else '',
                     'requiresSelectionMin': 0,
                     'requiresSelectionMax': requires_selection_max,
-                    'options': option_details
+                    'ingredients': option_details
                 })
 
         except Exception as e:
