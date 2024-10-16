@@ -117,7 +117,7 @@ def compile_restaurant_data(store_header, mx_info, store_opening_hours, menu_gro
             },
             'storeOpeningHours': store_opening_hours,
             'priceRange': store_header.get('priceRangeDisplayString', ''),
-            'telephone': mx_info.get('phoneno', ''),
+            'telephone': mx_info.get('phoneno', '') or '',
             'ratingValue': '',
             'ratingCount': '',
             'latitude': float(store_header.get('address', {}).get('lat', 0.0)),
@@ -134,13 +134,13 @@ def extract_and_transform_json_data(json_data):
         logging.error("No JSON data provided for transformation.")
         return {}
 
-    results = json_data.get('json', {}).get('results', [])
+    results = json_data.get('platformProps', {}).get('apolloCacheData', [])
     if not results:
         logging.error("No results found in the provided JSON data.")
         return {}
 
     for result in results:
-        storepage_feed = result.get('result', {}).get('storepageFeed', {})
+        storepage_feed = result.get('data', {}).get('storepageFeed', {})
         if storepage_feed:
             store_header = extract_store_header(storepage_feed)
             mx_info = storepage_feed.get('mxInfo', {})
@@ -163,19 +163,34 @@ def extract_and_transform_json_data(json_data):
 
 def parse_store_data(driver):
     try:
+        # Wait for the script tag containing the Apollo data
         script_tag = WebDriverWait(driver, 60).until(
-            EC.presence_of_element_located((By.XPATH, '(//script[contains(text(),"ApolloSSRDataTransport")])[2]'))
+            EC.presence_of_element_located((By.XPATH, '(//script[contains(text(),"apolloCacheData")])[2]'))
         )
         json_text = script_tag.get_attribute('textContent')
+
+        logging.debug("Raw JSON text: %s", json_text)  # Log the raw JSON for debugging
+
     except Exception as e:
         logging.error("Could not find the script tag: %s", e)
         return {}
 
     try:
+        # Extract JSON part by finding the first occurrence of '{' and last '}'
         json_start = json_text.find('{')
         json_end = json_text.rfind('}') + 1
         json_str = json_text[json_start:json_end]
+
+        # Clean up problematic escape sequences
+        json_str = re.sub(r'\\(?!["\\/bfnrt])', r'\\\\', json_str)  # Correct invalid escape sequences
+
+        # Decode JSON content, handle unicode characters
+        json_str = json_str.encode().decode('unicode_escape')
+
+        # Parse the sanitized JSON string
         json_data = json.loads(json_str)
+    #        logging.info(f"json_data: {json_data}")
+
     except json.JSONDecodeError as e:
         logging.error("JSON decoding failed: %s", e)
         return {}
