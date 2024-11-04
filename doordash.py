@@ -165,7 +165,7 @@ def parse_store_data(driver):
     try:
         # Wait for the script tag containing the Apollo data
         script_tag = WebDriverWait(driver, 60).until(
-            EC.presence_of_element_located((By.XPATH, '(//script[contains(text(),"apolloCacheData")])[2]'))
+            EC.presence_of_element_located((By.XPATH, '(//script[contains(text(),"apolloCacheData") and contains(text(), "query")])'))
         )
         json_text = script_tag.get_attribute('textContent')
 
@@ -371,8 +371,9 @@ def is_scrolling(driver, previous_scroll_position):
 
 def scrape_menu(url, menu_id):
     global restaurant_detail, all_items_details, clicked_items
-    driver = Driver(uc=True, undetectable=True, headless=True)
-    driver.set_window_size(1024, 1024)  # Example for an iPad in portrait mode
+    driver = Driver(uc=True, undetectable=True, headless=False)
+#    driver.set_window_size(1024, 1024)  # Example for an iPad in portrait mode
+    driver.maximize_window()
 
     driver.get(url)
     time.sleep(50)  # Adjust the sleep time based on how long the page takes to load
